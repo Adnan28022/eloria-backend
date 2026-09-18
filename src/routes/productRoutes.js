@@ -17,7 +17,7 @@ router.post('/upload', authMiddleware, upload.array('images', 5), (req, res) => 
   if (!req.files || req.files.length === 0) {
     return res.status(400).json({ success: false, error: 'No files uploaded' });
   }
-  const imageUrls = req.files.map(file => `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/${file.filename}`);
+  const imageUrls = req.files.map(file => file.path);
   res.json({ success: true, data: { urls: imageUrls } });
 });
 
