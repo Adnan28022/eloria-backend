@@ -45,9 +45,51 @@ app.use(express.urlencoded({ extended: true }));
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Root route - API Info
+app.get('/', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbState = mongoose.connection.readyState;
+  const dbStatus = {
+    0: 'Disconnected',
+    1: 'Connected',
+    2: 'Connecting',
+    3: 'Disconnecting'
+  };
+
+  res.json({
+    success: true,
+    name: 'Eloria Skincare API',
+    version: '1.0.0',
+    status: 'Running',
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      status: dbStatus[dbState] || 'Unknown',
+      connected: dbState === 1
+    },
+    endpoints: {
+      health: '/health',
+      products: '/api/products',
+      categories: '/api/categories',
+      orders: '/api/orders',
+      deals: '/api/deals',
+      bundles: '/api/bundles',
+      auth: '/api/auth'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ success: true, message: '🌿 Eloria API is running', version: '1.0.0' });
+  const mongoose = require('mongoose');
+  const dbState = mongoose.connection.readyState;
+  res.json({ 
+    success: true, 
+    message: 'Eloria API is running',
+    database: dbState === 1 ? 'Connected' : 'Disconnected',
+    version: '1.0.0',
+    uptime: process.uptime().toFixed(2) + 's'
+  });
 });
 
 // Public Routes
