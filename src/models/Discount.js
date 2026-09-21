@@ -5,6 +5,7 @@ const discountSchema = new mongoose.Schema({
   type: { type: String, enum: ['Percentage', 'Fixed Amount'], required: true },
   value: { type: String, required: true },
   minOrder: { type: Number, default: 0 },
+  usageLimit: { type: Number, default: 0 }, // 0 = unlimited
   usesCount: { type: Number, default: 0 },
   expiryDate: { type: String, default: 'Never' },
   isActive: { type: Boolean, default: true },

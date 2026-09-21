@@ -32,6 +32,16 @@ const validateCoupon = async (req, res, next) => {
       return res.status(400).json(errorResponse(`Minimum order of Rs ${discount.minOrder.toLocaleString()} required for this coupon`));
     }
 
+    // Check usage limit
+    if (discount.usageLimit > 0 && discount.usesCount >= discount.usageLimit) {
+      // Auto-disable if not already disabled
+      if (discount.isActive) {
+        discount.isActive = false;
+        await discount.save();
+      }
+      return res.status(400).json(errorResponse('This promo code has reached its usage limit'));
+    }
+
     // Calculate discount amount
     const value = parseFloat(discount.value);
     let discountAmount = 0;

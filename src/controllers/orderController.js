@@ -58,6 +58,24 @@ const createOrder = async (req, res, next) => {
       });
     }
 
+    // If a coupon code was used, increment usesCount and auto-disable if limit reached
+    const couponCode = req.body.couponCode || req.body.discountCode;
+    if (couponCode) {
+      try {
+        const Discount = require('../models/Discount');
+        const discount = await Discount.findOne({ code: couponCode.toUpperCase().trim() });
+        if (discount) {
+          discount.usesCount = (discount.usesCount || 0) + 1;
+          if (discount.usageLimit > 0 && discount.usesCount >= discount.usageLimit) {
+            discount.isActive = false;
+          }
+          await discount.save();
+        }
+      } catch (discErr) {
+        console.error('Error updating discount usage:', discErr.message);
+      }
+    }
+
     // Send confirmation email asynchronously
     sendOrderConfirmationEmail(order).catch(console.error);
 
