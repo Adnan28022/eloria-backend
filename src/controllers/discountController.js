@@ -27,6 +27,11 @@ const validateCoupon = async (req, res, next) => {
       }
     }
 
+    // Check minimum order
+    if (discount.minOrder > 0 && cartTotal < discount.minOrder) {
+      return res.status(400).json(errorResponse(`Minimum order of Rs ${discount.minOrder.toLocaleString()} required for this coupon`));
+    }
+
     // Calculate discount amount
     const value = parseFloat(discount.value);
     let discountAmount = 0;
