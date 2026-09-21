@@ -26,11 +26,12 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:3001',
   'https://eloria-frontend-jt9c.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions = {
   origin: function(origin, callback) {
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
@@ -39,7 +40,12 @@ app.use(cors({
     }
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight for all routes
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 const path = require('path');
