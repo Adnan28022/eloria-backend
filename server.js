@@ -99,6 +99,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/deals', dealRoutes);
 app.use('/api/bundles', bundleRoutes);
+app.use('/api/discounts', discountRoutes);
 app.use('/api', miscRoutes);
 
 // Admin Routes (protected)
