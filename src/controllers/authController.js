@@ -1,14 +1,16 @@
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/Admin');
+const connectDB = require('../config/db');
 const generateToken = require('../utils/generateToken');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
 
 // @route POST /api/auth/login
 const loginAdmin = async (req, res, next) => {
   try {
+    await connectDB();
     const { email, password } = req.body;
 
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    const admin = await Admin.findOne({ email: email ? email.toLowerCase() : '' });
     if (!admin) {
       return res.status(401).json(errorResponse('Invalid credentials'));
     }

@@ -7,23 +7,25 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  if (cached.conn) {
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
-  if (mongoose.connection.readyState >= 1) {
+  if (mongoose.connection.readyState === 1) {
     cached.conn = mongoose.connection;
     return cached.conn;
   }
 
   if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((m) => {
+    cached.promise = mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+    }).then((m) => {
       console.log(`✅ MongoDB Connected: ${m.connection.host}`);
+      cached.conn = m;
       return m;
+    }).catch((err) => {
+      cached.promise = null;
+      throw err;
     });
   }
 
