@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
-const { sendOrderConfirmationEmail } = require('../utils/mailService');
+const { sendOrderConfirmationEmail, sendOrderStatusEmail } = require('../utils/mailService');
 
 // @route POST /api/orders — Public (checkout)
 const createOrder = async (req, res, next) => {
@@ -76,8 +76,12 @@ const createOrder = async (req, res, next) => {
       }
     }
 
-    // Send confirmation email asynchronously
-    sendOrderConfirmationEmail(order).catch(console.error);
+    // Send confirmation email asynchronously but awaited for Vercel
+    try {
+      await sendOrderConfirmationEmail(order);
+    } catch (emailErr) {
+      console.error('Failed to send order confirmation email:', emailErr);
+    }
 
     res.status(201).json(successResponse(order, 'Order placed successfully'));
   } catch (error) {
@@ -150,6 +154,12 @@ const updateOrderStatus = async (req, res, next) => {
           }
         }
       }
+    }
+
+    try {
+      await sendOrderStatusEmail(order.customer.name, order.customer.email, order._id, newStatus);
+    } catch (emailErr) {
+      console.error('Failed to send order status email:', emailErr);
     }
 
     res.json(successResponse(order, 'Order status updated'));
