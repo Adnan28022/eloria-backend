@@ -26,13 +26,22 @@ const app = express();
 // Disable ETags to avoid 304 Not Modified caching of stale CORS headers
 app.set('etag', false);
 
-// Robust Dynamic CORS handler with exact origin mirroring & cache prevention
+// Allowed Origins
+const allowedOrigins = [
+  'https://eloria-frontend.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+// Robust Explicit CORS handler
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
+  if (origin && allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
-    res.setHeader('Access-Control-Allow-Origin', '*');
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
